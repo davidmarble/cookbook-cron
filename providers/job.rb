@@ -5,24 +5,29 @@ action :add do
             @new_resource.instance_variable_set("@#{key}", value)
         end
     end
-    
+
     name = @new_resource.name
     minute = @new_resource.minute
     hour = @new_resource.hour
     day = @new_resource.day
     month = @new_resource.month
     weekday = @new_resource.weekday
+    user = @new_resource.user
     command = @new_resource.command
-    
-    if !command
+    description = @new_resource.description
+
+    unless command
         raise Chef::Exceptions::ValidationFailed, "Required argument 'command' is missing!"
+    end
+    unless user
+        raise Chef::Exceptions::ValidationFailed, "Required argument 'user' is missing!"
     end
 
     template "/etc/cron.d/#{name}" do
-        source "etc/cron.d/single-job-template.erb"
-        owner "root"
-        group "root"
-        mode "0644"
+        source 'etc/cron.d/single-job-template.erb'
+        owner 'root'
+        group 'root'
+        mode '0644'
         variables(
             :name => name,
             :minute => minute,
@@ -30,9 +35,11 @@ action :add do
             :day => day,
             :month => month,
             :weekday => weekday,
-            :command => command
+            :user => user,
+            :command => command,
+            :description => description
         )
-        cookbook "cron"
+        cookbook 'cron'
     end
 end
 

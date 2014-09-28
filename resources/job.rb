@@ -7,6 +7,8 @@ attribute :day, :kind_of => String, :default => "*"
 attribute :month, :kind_of => String, :default => "*"
 attribute :weekday, :kind_of => String, :default => "*"
 attribute :command, :kind_of => String, :default => nil
+attribute :user, :kind_of => String, :default => nil
+attribute :description, :kind_of => String, :default => nil
 
 attribute :jobinfo, :kind_of => Hash, :default => nil
 

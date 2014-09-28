@@ -19,51 +19,53 @@
 #
 
 cron_package = case node['platform']
-               when "redhat", "centos", "scientific", "fedora", "amazon"
-                 node['platform_version'].to_f >= 6.0 ? "cronie" : "vixie-cron"
-               else
-                 "cron"
+                   when "redhat", "centos", "scientific", "fedora", "amazon"
+                       node['platform_version'].to_f >= 6.0 ? "cronie" : "vixie-cron"
+                   else
+                       "cron"
                end
 
 package cron_package do
-  action :upgrade
+    action :upgrade
 end
 
 service "crond" do
-  case node['platform']
-  when "redhat", "centos", "scientific", "fedora", "amazon"
-    service_name "crond"
-  when "debian", "ubuntu"
-    service_name "cron"
-  end
-  action [:start, :enable]
-end
-
-if node[:cron].attribute?("crontab_lines")
-    template "/etc/crontab" do
-        source "etc/crontab.erb"
-        owner "root"
-        group "root"
-        mode "0644"
+    case node['platform']
+        when "redhat", "centos", "scientific", "fedora", "amazon"
+            service_name "crond"
+        when "debian", "ubuntu"
+            service_name "cron"
     end
+    action [:start, :enable]
 end
 
-if node[:cron].attribute?('predefined') 
-    node[:cron][:predefined].each do |job|
-        template "/etc/cron.d/#{job}" do
-            source "etc/cron.d/#{job}.erb"
+if node[:cron]
+    if node[:cron].attribute?("crontab_lines")
+        template "/etc/crontab" do
+            source "etc/crontab.erb"
             owner "root"
             group "root"
             mode "0644"
         end
     end
-end
+
+    if node[:cron].attribute?('predefined')
+        node[:cron][:predefined].each do |job|
+            template "/etc/cron.d/#{job}" do
+                source "etc/cron.d/#{job}.erb"
+                owner "root"
+                group "root"
+                mode "0644"
+            end
+        end
+    end
 
 
-if node[:cron].attribute?('crond')
-    node[:cron][:crond].each_pair do |name, jobinfo|
-        cron_job name do
-            jobinfo jobinfo
+    if node[:cron].attribute?('crond')
+        node[:cron][:crond].each_pair do |name, jobinfo|
+            cron_job name do
+                jobinfo jobinfo
+            end
         end
     end
 end
